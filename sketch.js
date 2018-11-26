@@ -3,15 +3,16 @@ var canvasID;
 
 function preload()
 {
-
+	matchGamePreload();
 }
 
 function setup()
 {
-	createCanvas(800,600);
+	createCanvas(1000,600);
 
 	frameRate(30);
 	matchGameSetupTables();
+	setupTimer();
 
 
 	canvasID = 1;

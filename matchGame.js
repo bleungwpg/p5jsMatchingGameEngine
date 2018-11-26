@@ -1,16 +1,14 @@
 var gridOfPhotosBackEnd;
 var gridOfPhotosPlayerSelection;
-var maxX;
-var maxY;
+var gridOfPhotos;
+var hiddenPhoto;
 var selectionCounter;
 var lock;
 var finalFrameCount;
 var lockFrame;
 var alpha1;
-var widthOfCard;
-var heightOfCard;
 
-function matchGameSetupTables()
+function matchGamePreload()
 {
 	// starting variables you should not modify
 	finalFrameCount = 0;
@@ -18,46 +16,23 @@ function matchGameSetupTables()
 	alpha1 = 255;
 	lock = false;
 
+	// link to file that student sees
+	setupStudentListOfCard();
 
-	// starting variables you CAN AND SHOULD MODIFY
-	// modify these values to change the size of your cards and playing field
-	widthOfCard = 25;
-	heightOfCard = 25;
-	// NOTE: maxX * maxY cannot be an odd number otherwise you will not have an even number of tiles
-	maxX = 5;
-	maxY = 10;
-
-
-
-
-
-	selectionCounter = new Array(6);
-
-	for (var x = 0; x < 5; x++)
-	{
-		selectionCounter[x]	= 0;
-	}
 
 
 	// setup grid structure
 	// --------------------------------------
 	gridOfPhotosPlayerSelection = new Array(maxX);
 	gridOfPhotosBackEnd = new Array(maxX);
-	var randomNumberCollection = new Array(maxX*maxY);
-
-	for (var x = 0, r = 0; x < maxX*maxY; r++)
-	{
-		randomNumberCollection[x] = r;
-		x++;
-		randomNumberCollection[x] = r;
-		x++;
-	}
+	gridOfPhotos = new Array(maxX);
 
 
 	for (var r = 0; r < maxX; r++)
 	{
 		gridOfPhotosBackEnd[r] = new Array(maxY);
 		gridOfPhotosPlayerSelection[r] = new Array(maxY);
+		gridOfPhotos[r] = new Array(maxY);
 	}
 
 	for (var r = 0; r < maxX; r++)
@@ -70,6 +45,26 @@ function matchGameSetupTables()
 	}
 
 
+
+	selectionCounter = new Array(6);
+
+	for (var x = 0; x < 5; x++)
+	{
+		selectionCounter[x]	= 0;
+	}
+
+	var randomNumberCollection = new Array(maxX*maxY);
+
+	for (var x = 0, r = 0; x < maxX*maxY; r++)
+	{
+		randomNumberCollection[x] = r;
+		x++;
+		randomNumberCollection[x] = r;
+		x++;
+	}
+
+
+	// generate random array pairs
 	var notFinished = true;
 	var nextR = 0;
 	var nextC = 0;
@@ -79,7 +74,7 @@ function matchGameSetupTables()
 		var countMax = 0;
 
 		console.log(nextR+" "+nextC+" "+maxX+" "+maxY+" "+temp+" "+randomNumberCollection.length);
-	
+
 		gridOfPhotosBackEnd[nextR][nextC] = randomNumberCollection[temp];
 
 		nextC++;
@@ -98,7 +93,43 @@ function matchGameSetupTables()
 		}
 
 	}
+
+
+	// rearrange data to fit with random array pairing
+	var x = 0;
+	var count = 0;
+	var countP = 0;
+	while (x < maxX * maxY / 2)
+	{
+
+		for (var r = 0; r < maxX; r++)
+		{
+			for (var c = 0; c < maxY; c++)
+			{
+				if (gridOfPhotosBackEnd[r][c] == x)
+				{
+					gridOfPhotos[r][c] = studentListOfCards[count];
+					count++;
+					countP++;
+				}
+				if (countP == 2)
+				{
+					x++;
+					countP = 0;
+					c = maxY;
+					r = maxX;
+				}
+			}
+		}
+
+	}
 	// --------------------------------------
+
+}
+
+
+function matchGameSetupTables()
+{
 
 }
 
@@ -114,17 +145,22 @@ function showCards()
 			if (mouseX > widthOfCard+widthOfCard*2*c && mouseX < widthOfCard+widthOfCard*2*c+widthOfCard*2 && mouseY > r*heightOfCard*2+heightOfCard && mouseY < r*heightOfCard*2+heightOfCard+heightOfCard*2 && mouseIsPressed == true && !lock)
 			{
 				lock = true;
-				gridOfPhotosPlayerSelection[r][c] = 1;
-				selectionCounter[0]++;
-				if (selectionCounter[0] == 1)
-				{				
-					selectionCounter[1] = r;
-					selectionCounter[2] = c;
-				}
-				else
+				if (selectionCounter[0] <= 1)
 				{
-					selectionCounter[3] = r;
-					selectionCounter[4] = c;					
+					gridOfPhotosPlayerSelection[r][c] = 1;
+
+					selectionCounter[0]++;
+					if (selectionCounter[0] == 1)
+					{				
+						selectionCounter[1] = r;
+						selectionCounter[2] = c;
+					}
+					else
+					{
+						selectionCounter[3] = r;
+						selectionCounter[4] = c;					
+					}
+
 				}
 			}
 			// shows the cards
@@ -133,12 +169,14 @@ function showCards()
 			{
 				fill(200,0,0);
 				rect(widthOfCard+widthOfCard*2*c,r*heightOfCard*2+heightOfCard,widthOfCard*2,heightOfCard*2);					
+				image(hiddenPhoto,widthOfCard*2*c+widthOfCard,heightOfCard*2*r+heightOfCard,widthOfCard*2,heightOfCard*2);
 			}
 			// 1 - flipped card
 			else if (gridOfPhotosPlayerSelection[r][c] == 1)
 			{
 				fill(0,200,0);
-				rect(widthOfCard+widthOfCard*2*c,r*heightOfCard*2+heightOfCard,widthOfCard*2,heightOfCard*2);										
+				rect(widthOfCard+widthOfCard*2*c,r*heightOfCard*2+heightOfCard,widthOfCard*2,heightOfCard*2);
+				image(gridOfPhotos[r][c],widthOfCard*2*c+widthOfCard,heightOfCard*2*r+heightOfCard,widthOfCard*2,heightOfCard*2);
 			}
 			// 2 - card is removed
 
@@ -157,29 +195,33 @@ function doesItMatch()
 	// check if they have selected 2 items and reset
 	if (selectionCounter[0] == 2)
 	{
-		// are the cards a match?
-		if (gridOfPhotosBackEnd[selectionCounter[1]][selectionCounter[2]] == gridOfPhotosBackEnd[selectionCounter[3]][selectionCounter[4]] &&
-			(selectionCounter[1] != selectionCounter[3] || selectionCounter[2] != selectionCounter[4]))
+		if (delayTime() == -1)
 		{
-			match = true;
-			lockFrame = false;
-			// remove cards
-			gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 2;
-			gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 2;
+			// are the cards a match?
+			if (gridOfPhotosBackEnd[selectionCounter[1]][selectionCounter[2]] == gridOfPhotosBackEnd[selectionCounter[3]][selectionCounter[4]] &&
+				(selectionCounter[1] != selectionCounter[3] || selectionCounter[2] != selectionCounter[4]))
+			{
+				match = true;
+				lockFrame = false;
+				// remove cards
+				gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 2;
+				gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 2;
 
-		}
-		else
-		{
-			// turn cards back to red
-			gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 0;
-			gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 0;
+			}
+			else
+			{
+				// turn cards back to red
+				gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 0;
+				gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 0;
 
-		}
+			}
 
-		// reset selected items back to all covered
-		for (var x = 0; x < 5; x++)
-		{
-			selectionCounter[x] = 0;
+			// reset selected items back to all covered
+			for (var x = 0; x < 5; x++)
+			{
+				selectionCounter[x] = 0;
+			}
+
 		}
 	}
 	
