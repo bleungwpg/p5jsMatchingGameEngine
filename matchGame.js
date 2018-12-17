@@ -142,7 +142,7 @@ function showCards()
 		{
 			// this is where we see if a card is clicked or not
 			// at the top of this is a good place to put sound effects
-			if (mouseX > widthOfCard+widthOfCard*2*c && mouseX < widthOfCard+widthOfCard*2*c+widthOfCard*2 && mouseY > r*heightOfCard*2+heightOfCard && mouseY < r*heightOfCard*2+heightOfCard+heightOfCard*2 && mouseIsPressed == true && !lock)
+			if (mouseX > widthOfCard+widthOfCard*2*c && mouseX < widthOfCard+widthOfCard*2*c+widthOfCard*2 && mouseY > r*heightOfCard*2+heightOfCard && mouseY < r*heightOfCard*2+heightOfCard+heightOfCard*2 && mouseIsPressed == true && !lock && gridOfPhotosPlayerSelection[r][c] != 2)
 			{
 				lock = true;
 				if (selectionCounter[0] <= maxMatch-1)
@@ -217,7 +217,7 @@ function doesItMatch()
 					}
 				}
 			}
-			// if everything matches the remove all the cards
+			// if everything matches then remove all the cards
 			if (matchCounter == maxMatch && uniqueMatch == true)
 			{
 				match = true;
@@ -242,34 +242,6 @@ function doesItMatch()
 			{
 				selectionCounter[x] = 0;
 			}
-			
-/*
-			// original code
-			// are the cards a match?
-			if (gridOfPhotosBackEnd[selectionCounter[1]][selectionCounter[2]] == gridOfPhotosBackEnd[selectionCounter[3]][selectionCounter[4]] &&
-				(selectionCounter[1] != selectionCounter[3] || selectionCounter[2] != selectionCounter[4]))
-			{
-				match = true;
-				lockFrame = false;
-				// remove cards
-				gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 2;
-				gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 2;
-
-			}
-			else
-			{
-				// turn cards back to red
-				gridOfPhotosPlayerSelection[selectionCounter[1]][selectionCounter[2]] = 0;
-				gridOfPhotosPlayerSelection[selectionCounter[3]][selectionCounter[4]] = 0;
-
-			}
-
-			// reset selected items back to all covered
-			for (var x = 0; x < 1+maxMatch*2; x++)
-			{
-				selectionCounter[x] = 0;
-			}
-*/
 		}
 	}
 	
